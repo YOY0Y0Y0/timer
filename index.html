@@ -34,7 +34,7 @@
   }
 
   *{box-sizing:border-box;}
-  html,body{height:100%;}
+  html,body{height:100%; height:100dvh;}
   body{
     margin:0;
     background:var(--bg);
@@ -46,13 +46,15 @@
 
   .app{
     height:100%;
+    height:100dvh;
     min-height:100%;
+    min-height:100dvh;
     display:flex;
     flex-direction:column;
     position:relative;
     background:
       radial-gradient(120% 70% at 50% -10%, var(--bg-2) 0%, var(--bg) 60%);
-    overflow:hidden;
+    overflow-y:auto;
   }
 
   /* ---------- top bar ---------- */
@@ -893,12 +895,19 @@
     els.totalTime.textContent = formatTime(total);
   }
 
+  // Rest can be dialed down second-by-second below 5s, instead of
+  // jumping straight from 5 to 0 with the normal +/-5 step.
+  function nextRestValue(cur, delta){
+    if(delta > 0) return cur < 5 ? cur + 1 : cur + 5;
+    return cur <= 5 ? cur - 1 : cur - 5;
+  }
+
   document.querySelectorAll('.step-btn').forEach(function(btn){
     btn.addEventListener('click', function(){
       var field = btn.dataset.field;
       var delta = parseInt(btn.dataset.delta, 10);
       var lim = fieldLimits[field];
-      var next = settings[field] + delta;
+      var next = field === 'rest' ? nextRestValue(settings[field], delta) : settings[field] + delta;
       next = Math.max(lim.min, Math.min(lim.max, next));
       settings[field] = next;
       saveSettings();
